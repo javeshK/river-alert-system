@@ -1,0 +1,32 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>River Water Alert</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <h1 class="text-primary">🌊 River Water Monitoring System</h1>
+    <p><strong>Latest Level:</strong> {{ level }} cm</p>
+    <p><strong>Time:</strong> {{ time }}</p>
+    <p><strong>Prediction:</strong> {{ prediction }}</p>
+    <hr>
+    <h4>📥 Enter Water Level Manually (for Alert Log)</h4>
+    <form action="/submit" method="POST">
+        <div class="mb-3">
+            <label for="manual_level" class="form-label">Water Level (cm):</label>
+            <input type="number" step="0.1" min="0" class="form-control" name="manual_level" required>
+        </div>
+        <button type="submit" class="btn btn-warning">Submit Level</button>
+        {% if status_msg %}
+            <div class="alert {{ 'alert-danger' if status_msg == 'Danger' else 'alert-success' }} mt-3">
+                <strong>{{ '⚠️ Alert! Water Level Exceeds Danger Limit!' if status_msg == 'Danger' else '✅ Water Level is Safe.' }}</strong>
+            </div>
+        {% endif %}
+    </form>
+
+
+    <img src="{{ graph_path }}" class="img-fluid mt-4" alt="Water Level Graph">
+</body>
+</html>
