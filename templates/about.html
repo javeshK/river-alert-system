@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About - River Alert System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #f9fafb, #eef2f7);
+      color: #2a2a2a;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .page-transition {
+      opacity: 0;
+      transition: opacity 0.6s ease-in-out;
+    }
+    .page-transition.active {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="page-transition">
+
+  <!-- Navbar -->
+  <nav class="bg-white bg-opacity-80 backdrop-blur-md shadow-md fixed w-full top-0 z-50">
+    <div class="container mx-auto px-6 flex justify-between items-center h-16">
+      <a href="/" class="text-xl font-bold text-blue-600">🌊 RWAS </a>
+      <div class="space-x-6">
+        <a href="/" class="hover:text-blue-500">Home</a>
+        <a href="/about" class="hover:text-blue-500">About</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- About Section -->
+  <section class="container mx-auto px-6 py-24 text-center">
+    <h1 class="text-4xl font-bold text-blue-600 mb-8">About This Project</h1>
+    
+    <div class="flex flex-col md:flex-row items-center justify-center gap-10 bg-white p-10 rounded-2xl shadow-lg">
+      
+      <!-- Profile Image -->
+      <div class="w-40 h-40">
+        <img src="{{ url_for('static', filename='wallpaper.jpg') }}" alt="Student Profile"
+             class="rounded-full border-4 border-blue-400 shadow-md object-cover w-full h-full">
+      </div>
+
+      <!-- Description -->
+      <div class="max-w-xl text-left">
+        <h2 class="text-2xl font-semibold mb-3 text-gray-900"> Built by Javesh Khosla </h2>
+        <p class="text-gray-600 leading-relaxed">
+          This Water-Level Alert System was developed as a Computer Science project with the goal 
+          of ensuring riverbank communities get timely alerts when water levels reach dangerous heights. 
+          By combining technology with real-world safety, this system aims to save lives and reduce disaster risks.
+        </p>
+        <p class="mt-4 text-blue-500 italic">
+          "Technology can save lives when used with the right purpose."
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white text-center py-6 text-gray-500 shadow-inner">
+    <p class="text-sm">© 2025 River Alert System | Built with 💙 by Javesh Khosla</p>
+  </footer>
+
+  <!-- Transition Script -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.classList.add("active");
+    });
+    document.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", e => {
+        if (link.href && !link.href.includes("#")) {
+          e.preventDefault();
+          document.body.classList.remove("active");
+          setTimeout(() => {
+            window.location.href = link.href;
+          }, 500);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

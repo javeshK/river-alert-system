@@ -1,0 +1,342 @@
+# Predict when level will exceed the danger line     (this is a linear regression)
+# def predict_exceed_time(df):
+#     df['timestamp'] = pd.to_datetime(df['timestamp'])
+#     df['hour_index'] = (df['timestamp'] - df['timestamp'].min()).dt.total_seconds() / 3600
+
+#     x = df['hour_index'].values
+#     y = df['level'].values
+
+#     if len(set(y)) <= 1:
+#         return "Water level is constant."
+    
+#     try:
+#         m, c = np.polyfit(x, y, 1)
+#         if m <= 0:
+#             return "Water level is decreasing. No danger."
+
+#         hour_to_cross = (DANGER_LEVEL - c) / m
+#         predicted_time = df['timestamp'].min() + timedelta(hours=hour_to_cross)
+
+#         if hour_to_cross < x[-1]:
+#             return f"Already exceeded on {predicted_time.strftime('%Y-%m-%d %H:%M')}"
+#         else:
+#             return f"Will exceed danger level on {predicted_time.strftime('%Y-%m-%d %H:%M')}"
+#     except:
+#         return "Prediction error."
+
+
+
+ #####  index.html (backup)
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>River Water Level Alert</title>
+</head>
+<body>
+    <h1>🌊 Ganga River Water Level Dashboard</h1>
+
+    {% if status_msg %}
+        <p><b>Status:</b> {{ status_msg }}</p>
+    {% endif %}
+
+    <h2>Latest Sample Water Level: {{ level }} cm (at {{ time }})</h2>
+    <img src="{{ graph_path }}" alt="Water Level Graph" width="600">
+    <p>{{ prediction }}</p>
+
+    <hr>
+    <h3>📩 Sign Up for Email Alerts</h3>
+    <form method="POST" action="/signup">
+        <input type="email" name="email" placeholder="Enter your email" required><br><br>
+        <label><input type="checkbox" name="cities" value="Varanasi"> Varanasi (Danger: {{ city_danger["Varanasi"] }} cm)</label><br>
+        <label><input type="checkbox" name="cities" value="Haridwar"> Haridwar (Danger: {{ city_danger["Haridwar"] }} cm)</label><br>
+        <label><input type="checkbox" name="cities" value="Prayagraj"> Prayagraj (Danger: {{ city_danger["Prayagraj"] }} cm)</label><br><br>
+        <button type="submit">Sign Up</button>
+    </form>
+
+    <hr>
+    <h3>✍️ Manual Alert Submission</h3>
+    <form method="POST" action="/submit">
+        <label>Varanasi Level (cm):</label>
+        <input type="number" step="0.1" name="varanasi_level"><br><br>
+
+        <label>Haridwar Level (cm):</label>
+        <input type="number" step="0.1" name="haridwar_level"><br><br>
+
+        <label>Prayagraj Level (cm):</label>
+        <input type="number" step="0.1" name="prayagraj_level"><br><br>
+
+        <button type="submit">Submit Alerts</button>
+    </form>
+</body>
+</html>
+
+
+
+
+
+########  Working theme index.html ##################
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🌊 River Alert System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0f29, #1b2a49);
+            color: #e0e6f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #0d1b3d;
+            padding: 20px;
+            text-align: center;
+            color: #4da6ff;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.4);
+        }
+
+        .container {
+            width: 85%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .card {
+            background: #132347;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.6);
+            margin-bottom: 25px;
+        }
+
+        h2, h3 {
+            color: #4da6ff;
+        }
+
+        .status {
+            background: #1b3059;
+            border-left: 5px solid #4da6ff;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+
+        input, button, select {
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            margin: 5px 0;
+            font-size: 15px;
+        }
+
+        input, select {
+            width: 100%;
+        }
+
+        button {
+            background: #4da6ff;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #3399ff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .graph img {
+            width: 100%;
+            border-radius: 12px;
+            border: 2px solid #4da6ff;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #c9d6f5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            background: #0d1b3d;
+            color: #7f9fcc;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>🌊 River Water Level Alert System</header>
+
+    <div class="container">
+
+        {% if status_msg %}
+        <div class="status">{{ status_msg }}</div>
+        {% endif %}
+
+        <div class="grid">
+
+            <!-- 📊 Water Graph + Prediction -->
+            <div class="card graph">
+                <h2>📉 Water Level Graph</h2>
+                <p><b>Latest Level:</b> {{ level }} cm at {{ time }}</p>
+                <p><b>Prediction:</b> {{ prediction }}</p>
+                <img src="{{ graph_path }}" alt="Water Level Graph">
+            </div>
+
+            <!-- 👤 Signup Form -->
+            <div class="card">
+                <h2>👤 Sign Up for Alerts</h2>
+                <form method="POST" action="/signup">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="name" required>
+
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" required>
+
+                    <label class="form-label">Select Cities</label><br>
+                    {% for city in city_danger.keys() %}
+                        <input type="checkbox" name="cities" value="{{ city }}"> {{ city }}<br>
+                    {% endfor %}
+
+                    <button type="submit">✅ Sign Up</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ✍️ Manual Input -->
+        <div class="card">
+            <h2>✍️ Enter Manual Water Levels</h2>
+            <form method="POST" action="/submit">
+                <div class="grid">
+                    {% for city, danger in city_danger.items() %}
+                    <div>
+                        <label class="form-label">{{ city }} (Danger: {{ danger }} cm)</label>
+                        <input type="number" step="0.1" name="{{ city.lower() }}_level" placeholder="Enter level in cm">
+                    </div>
+                    {% endfor %}
+                </div>
+                <br>
+                <button type="submit">🚨 Submit Levels</button>
+            </form>
+        </div>
+
+    </div>
+
+    <footer>© 2025 River Alert System | Stay Safe 💧</footer>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+################### about.html backup ##########################
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ℹ️ About | River Alert System</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2a2a44);
+      color: #f1f1f1;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 2rem;
+    }
+    .btn {
+      transition: all 0.3s ease-in-out;
+    }
+    .btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="p-6 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-500 animate-pulse">
+      ℹ️ About River Alert System
+    </h1>
+    <p class="mt-2 text-gray-300">Learn more about why I built this.</p>
+  </header>
+
+  <!-- About Content -->
+  <main class="flex-grow flex items-center justify-center px-6">
+    <div class="glass max-w-3xl text-center">
+      <h2 class="text-2xl font-semibold text-blue-300 mb-4">🌊 Mission</h2>
+      <p class="text-gray-200 leading-relaxed mb-6">
+        The <strong>River Alert System</strong> is designed to keep communities safe by providing 
+        real-time water-level monitoring, predictions, and instant alerts. 
+        My goal is to prevent disasters by empowering people with timely information.
+      </p>
+
+      <h2 class="text-2xl font-semibold text-violet-300 mb-4">🚀 Features</h2>
+      <ul class="text-gray-200 list-disc list-inside mb-6 space-y-2">
+        <li>Danger threshold alerts 🚨</li>
+        <li>Email notifications for subscribed users 📩</li>
+      </ul>
+
+      <h2 class="text-2xl font-semibold text-blue-300 mb-4">👩‍💻 Our Vision</h2>
+      <p class="text-gray-200 leading-relaxed mb-6">
+        We believe technology should save lives. This platform 
+        blends data science, visualization, and modern web design 
+        to make flood safety accessible and engaging for everyone.
+      </p>
+
+      <a href="/" class="btn px-6 py-2 bg-gradient-to-r from-violet-600 to-blue-500 rounded-xl font-semibold">
+        ⬅️ Back to Home
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-12 mb-6 text-center text-gray-400 text-sm">
+    🌐 Built for safer rivers — 2025
+  </footer>
+</body>
+</html>
+
+
+
+
+
+
