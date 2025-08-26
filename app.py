@@ -1,3 +1,6 @@
+
+#  app.py
+
 from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
 import numpy as np
@@ -20,7 +23,7 @@ GRAPH_FILE = "static/graph.png"
 USERS_FILE = "users.csv"
 ALERT_FILE = "manual_alert_log.csv"
 
-# 🚨 City danger levels
+#  City danger levels
 CITY_DANGER = {
     "Varanasi": 72,
     "Haridwar": 293,
@@ -65,16 +68,16 @@ def notify_users(city, level, timestamp):
 
                 The water level in {city} has crossed the danger threshold.
 
-                Current Level: {level} cm
+                Current Level: {level} m
                 Time: {timestamp}
-                Danger Level: {CITY_DANGER[city]} cm
+                Danger Level: {CITY_DANGER[city]} m
 
                 Please stay safe.
                 """
                 send_email(user["email"], subject, body)
 
 
-# 📊 Create Graph
+#  Create Graph
 def create_plot(df):
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     plt.figure(figsize=(10, 6))
